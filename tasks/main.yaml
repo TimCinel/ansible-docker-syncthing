@@ -8,7 +8,7 @@
     uid: "{{ syncthing_owner_id }}"
 - group:
     name: "{{ syncthing_group }}"
-    uid: "{{ syncthing_group_id }}"
+    gid: "{{ syncthing_group_id }}"
 
  
 # build directory and resources
