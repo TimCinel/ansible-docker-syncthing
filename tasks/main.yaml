@@ -18,7 +18,6 @@
     recurse: yes
     owner: "{{ syncthing_owner }}"
     group: docker
-  when: syncthing_do_build
 - name: copy build recipe and ingredients
   copy:
     src: "{{ item }}"
