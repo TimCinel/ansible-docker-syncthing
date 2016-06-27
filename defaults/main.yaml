@@ -1,5 +1,4 @@
 ---
-syncthing_additional_volumes: []
 syncthing_docker_network: bridge
 syncthing_docker_ports:
   - "22000:22000"
@@ -9,6 +8,10 @@ syncthing_memory_limit: 150000000
 syncthing_do_build: true
 
 syncthing_nginx_location: /syncthing/
+
+syncthing_nginx_vhost_locationsd_dir: [ "/etc/nginx/locations.d/default-syncthing" ]
+
+syncthing_nginx_public_folders: []
 
 # Example web sharing of public folders:
 # syncthing_nginx_public_folders:

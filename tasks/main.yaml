@@ -26,8 +26,9 @@
   with_items:
     - Dockerfile
     - entrypoint.sh
-    - nginx-location.conf
-  when: syncthing_do_build
+- template:
+    src: nginx-location.conf.j2
+    dest: "{{ syncthing_build_dir }}/nginx-location.conf"
 
 # share root and shared directories
 - file:
@@ -67,10 +68,11 @@
     state: reloaded
     restart_policy: unless-stopped
     pull: missing
-    volumes: "{{ syncthing_docker_volumes + syncthing_additional_volumes }}"
+    volumes: "{{ syncthing_docker_volumes + syncthing_nginx_vhost_locationsd_dir }}"
     ports: "{{ syncthing_docker_ports }}"
     env:
       SYNCTHING_USER_ID: "{{ syncthing_owner_id }}"
       SYNCTHING_GROUP_ID: "{{ syncthing_group_id }}"
+      NGINX_LOCATIONSD_PATH: "{{ syncthing_nginx_vhost_locationsd_dir | join('') }}"
     memory_limit: "{{ syncthing_memory_limit }}"
     net: "{{ syncthing_docker_network }}"
