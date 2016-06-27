@@ -1,0 +1,17 @@
+---
+syncthing_additional_volumes: []
+syncthing_docker_network: bridge
+syncthing_docker_ports:
+  - "22000:22000"
+# publish web UI port if not using nginx
+#  - "8384:8384"
+syncthing_memory_limit: 150000000
+syncthing_do_build: true
+
+syncthing_nginx_location: /syncthing/
+
+# Example web sharing of public folders:
+# syncthing_nginx_public_folders:
+#   - location: /public/
+#     alias: /data/syncthing/timcinel_com_public/
+#     index: False

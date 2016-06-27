@@ -1,0 +1,76 @@
+---
+# services
+- service:
+   name: docker
+   state: started
+- user:
+    name: "{{ syncthing_owner }}"
+    uid: "{{ syncthing_owner_id }}"
+- group:
+    name: "{{ syncthing_group }}"
+    uid: "{{ syncthing_group_id }}"
+
+ 
+# build directory and resources
+- file:
+    path: "{{ syncthing_build_dir }}"
+    state: directory
+    recurse: yes
+    owner: "{{ syncthing_owner }}"
+    group: docker
+  when: syncthing_do_build
+- name: copy build recipe and ingredients
+  copy:
+    src: "{{ item }}"
+    dest: "{{ syncthing_build_dir }}"
+  with_items:
+    - Dockerfile
+    - entrypoint.sh
+    - nginx-location.conf
+  when: syncthing_do_build
+
+# share root and shared directories
+- file:
+    path: "{{ syncthing_share_root }}/{{ item }}"
+    state: directory
+    recurse: yes
+    owner: "{{ syncthing_owner }}"
+    group: "{{ syncthing_group }}"
+  with_items: "{{ syncthing_make_shared_dirs }}"
+- file:
+    path: "{{ syncthing_config_destination_dir }}"
+    state: directory
+    recurse: yes
+    owner: "{{ syncthing_owner }}"
+    group: "{{ syncthing_group }}"
+- name: copy configuration and key material
+  copy:
+    src: "{{ syncthing_config_source_dir }}/{{ item }}"
+    dest: "{{ syncthing_config_destination_dir }}"
+    owner: "{{ syncthing_owner }}"
+    group: "{{ syncthing_group }}"
+    mode: 0400
+  with_items:
+    - cert.pem
+    - key.pem
+    - config.xml
+- shell: docker build -t timcinel/syncthing .
+  args:
+    chdir: "{{ syncthing_build_dir }}"
+- set_fact:
+    syncthing_docker_volumes:
+      - "{{ syncthing_config_destination_dir }}:/home/syncthing/.config/syncthing"
+      - "{{ syncthing_share_root }}:{{ syncthing_share_root }}"
+- docker:
+    image: timcinel/syncthing
+    name: syncthing
+    state: reloaded
+    restart_policy: unless-stopped
+    pull: missing
+    volumes: "{{ syncthing_docker_volumes + syncthing_additional_volumes }}"
+    ports: "{{ syncthing_docker_ports }}"
+    env:
+      SYNCTHING_USER_ID: "{{ syncthing_owner_id }}"
+      SYNCTHING_GROUP_ID: "{{ syncthing_group_id }}"
+    memory_limit: "{{ syncthing_memory_limit }}"
+    net: "{{ syncthing_docker_network }}"
