@@ -1,1 +1,17 @@
-../files/nginx-location.conf.j2
+{% for public_folder in syncthing_nginx_public_folders %}
+location {{ public_folder.location }} {
+  alias {{public_folder.alias}};
+  {% if public_folder.index -%}
+  autoindex on;
+  {%- endif %}
+}
+{% endfor %}
+
+location {{ syncthing_nginx_location }} {
+  proxy_set_header        Host ;
+  proxy_set_header        X-Real-IP ;
+  proxy_set_header        X-Forwarded-For ;
+  proxy_set_header        X-Forwarded-Proto ;
+
+  proxy_pass              http://syncthing:8384/\;
+}
