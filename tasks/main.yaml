@@ -59,26 +59,33 @@
     - cert.pem
     - key.pem
     - config.xml
-- shell: docker build -t timcinel/syncthing .
-  args:
-    chdir: "{{ syncthing_build_dir }}"
+- docker_image:
+    name: timcinel/syncthing
+    tag: latest
+    path: "{{ syncthing_build_dir }}"
 - set_fact:
     syncthing_docker_volumes:
       - "{{ syncthing_config_destination_dir }}:/home/syncthing/.config/syncthing"
       - "{{ syncthing_share_root }}:{{ syncthing_share_root }}"
-- docker:
-    image: timcinel/syncthing
+- docker_container:
     name: syncthing
-    state: reloaded
-    restart_policy: unless-stopped
-    pull: missing
-    volumes: "{{ syncthing_docker_volumes + syncthing_nginx_vhost_locationsd_dir }}"
-    ports: "{{ syncthing_docker_ports }}"
+    image: timcinel/syncthing
+    state: started
+    restart_policy: on-failure
+    volumes: "{{ syncthing_docker_volumes }}"
+    published_ports: "{{ syncthing_docker_ports }}"
     env:
       DOCKER_USER: "syncthing"
       DOCKER_USER_ID: "{{ syncthing_owner_id }}"
       DOCKER_GROUP: "syncthing"
       DOCKER_GROUP_ID: "{{ syncthing_group_id }}"
-      NGINX_LOCATIONSD_PATH: "{{ syncthing_nginx_vhost_locationsd_dir | join('') }}"
-    memory_limit: "{{ syncthing_memory_limit }}"
-    net: "{{ syncthing_docker_network }}"
+    memory: "{{ syncthing_memory_limit }}"
+    networks:
+      - name: "{{ syncthing_docker_network }}"
+- docker_container:
+    name: syncthing-locations-data
+    image: alpine
+    state: stopped
+    volumes:
+      - "{{ syncthing_build_dir }}/nginx-location.conf:{{ syncthing_nginx_vhost_locationsd_dir }}/location.conf"
+    command: /bin/true
