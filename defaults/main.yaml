@@ -9,7 +9,7 @@ syncthing_do_build: true
 
 syncthing_nginx_location: /syncthing/
 
-syncthing_nginx_vhost_locationsd_dir: [ "/etc/nginx/locations.d/default-syncthing" ]
+syncthing_nginx_vhost_locationsd_dir: "/etc/nginx/locations.d/default-syncthing"
 
 syncthing_nginx_public_folders: []
 
