@@ -71,7 +71,7 @@
     name: syncthing
     image: timcinel/syncthing
     state: started
-    restart_policy: on-failure
+    restart_policy: always
     volumes: "{{ syncthing_docker_volumes }}"
     published_ports: "{{ syncthing_docker_ports }}"
     env:
